@@ -1,10 +1,12 @@
 import React from 'react';
-//import logo from './logo.svg';
+import Labs from "./Labs";
 import './App.css';
 
 function App() {
   return (
-    <h1> Welcome to Web Dev!!! </h1>
+    <div>
+      <Labs />
+    </div>
   );
 }
 
