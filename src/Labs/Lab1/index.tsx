@@ -176,7 +176,7 @@ export default function Lab1() {
                 <br />
                 <img id="wd-teslabot"
                      height="200px"
-                     src="images/teslabot.jpg"
+                     src="/images/teslabot.jpg"
                      alt="teslabot.jpg"
                 />
             </div>
@@ -310,8 +310,7 @@ export default function Lab1() {
                 Please <a id="wd-lipsum" href="https://www.lipsum.com">click here</a> to get dummy text.
                 <br />
 
-                Pleas <a id="wd-lipsum" href="">click here</a> to navigate to the code repo on GitHub.
-
+                Please <a id="wd-lipsum" href="https://github.com/KelsyF/kanbas-react-web-app/tree/A1">click here</a> to navigate to the code repo on GitHub.
             </div>
         </div>
     );
