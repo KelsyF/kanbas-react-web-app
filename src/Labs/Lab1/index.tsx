@@ -175,7 +175,7 @@ export default function Lab1() {
                 Loading a local image:
                 <br />
                 <img id="wd-teslabot"
-                     height="200px"
+                     height="264"
                      src="/images/teslabot.jpg"
                      alt="teslabot.jpg"
                 />
