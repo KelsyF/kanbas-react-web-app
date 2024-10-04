@@ -1,11 +1,13 @@
 
-export default function Assingments() {
+import AssignmentsControls from "./AssignmentsControls";
+
+export default function Assignments() {
     return (
         <div id="wd-assignments">
-            <input id="wd-search-assignment"
-                   placeholder="Search for Assignments" /> &nbsp;
-            <button id="wd-add-assignment-group">+ Group</button> &nbsp;
-            <button id="wd-add-assignment">+ Assignment</button>
+            <AssignmentsControls />
+            <br/>
+            <br/>
+            <br/>
             <h3 id="wd-assignments-title">
                 ASSIGNMENTS 40% of Total <button>+</button>
             </h3>

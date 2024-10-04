@@ -74,7 +74,7 @@ export default function BootstrapForms() {
                 </div>
             </div>
             <div id="wd-css-responsive-forms-1">
-                <h3>Responsive forms</h3>
+                <h3>Responsive Forms</h3>
                 <div className="mb-3 row">
                     <label htmlFor="email1"
                            className="col-sm-2 col-form-label">
@@ -104,7 +104,7 @@ export default function BootstrapForms() {
                 </div>
             </div>
             <div id="wd-css-responsive-forms-2">
-                <h3>Responsive Forms</h3>
+                <h3>Responsive Forms 2</h3>
                 <form>
                     <div className="row mb-3">
                         <label htmlFor="r1" className="col-sm-2 col-form-label">
