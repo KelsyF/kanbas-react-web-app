@@ -16,7 +16,7 @@ export default function KanbasNavigation() {
             </a>
             <NavLink to="/Kanbas/Account" id="wd-account-link"
                 className={ ({isActive}) =>
-                    `list-group-item text-center border-0 ${isActive ? 'bg-white text-danger' : 'bg-black text-white'}`}>
+                    `list-group-item text-center border-0 ${isActive ? "bg-white text-danger" : "bg-black text-white"}`}>
                     <VscAccount className="fs-1 text" />
                     <br />
                     Account
