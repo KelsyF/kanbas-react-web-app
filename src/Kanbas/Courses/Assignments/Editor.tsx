@@ -1,32 +1,43 @@
 
+import { useParams, useNavigate } from "react-router-dom";
+import * as db from "../../Database";
 
 export default function AssignmentEditor() {
+    const { cid, aid } = useParams();
+    const navigate = useNavigate();
+    const assignments = db.assignments;
+    const assignment = assignments.find((assignment: any) => assignment.course === cid
+                                                                                        && assignment._id === aid)
+
+    if (!assignment) {
+        return <div>Assignment not found!</div>;
+    }
+
     return (
-      <div id="wd-assignments-editor" className="col mb-3 me-3">
-          <label htmlFor="wd-name" className="form-label text-secondary fw-bold mt-3 mb-3">
-              Assignment Name
-          </label>
-          <input type="text"
-                 id="wd-name"
-                 className="form-control mb-3"
-                 value="A1 - ENV + HTML"
-          />
-          <textarea
-              id="wd-description"
+      <div id="wd-assignments-editor">
+          <div id="wd-assignment-editor" className="col mb-3 me-3">
+              <label htmlFor="wd-name" className="form-label text-secondary fw-bold mt-3 mb-3">
+                  Assignment Name
+              </label>
+              <input type="text"
+              id="wd-name"
               className="form-control mb-3"
-              cols={50}
-              rows={9}>
-              The assignment is available online. Submit a link to the landing page of your Web application running on Netlify.
-              The landing page should include the following: Your full name and section Links to each of the lab assignments.
-              Link to the Kanbas application Links to all relevant source code repositories The Kanbas application should include a link
-              to navigate back to the landing page.
-          </textarea>
+              value={assignment.title}
+              />
+              <textarea
+                  id="wd-description"
+                  className="form-control mb-3"
+                  cols={50}
+                  rows={9}>
+                  {assignment.description}
+              </textarea>
+          </div>
           <div className="row mb-3 d-flex align-items-center">
                 <label htmlFor="wd-points" className="col-sm-2 col-form-label text-secondary fw-bold text-end">
                     Points
                 </label>
               <div className="col-sm-10">
-                  <input id="wd-points" value={100} className="form-control" />
+                  <input id="wd-points" value={assignment.points} className="form-control" />
               </div>
           </div>
           <div className="row mb-3 d-flex align-items-center">
@@ -123,28 +134,35 @@ export default function AssignmentEditor() {
                       <label htmlFor="wd-due-date" className="col-form-label text-secondary fw-bold">
                           Due
                       </label>
-                      <input type="date" id="wd-due-date" value="2024-05-13" className="form-control" />
+                      <input type="date" id="wd-due-date" value={assignment.dueDate} className="form-control" />
                   </div>
                   <div className="row mb-3">
                       <div className="col-sm-5 me-5">
                           <label htmlFor="wd-available-from" className="col-form-label text-secondary fw-bold">
                               Available From
                           </label>
-                          <input type="date" id="wd-available-from" value="2024-05-06" className="form-control" />
+                          <input type="date" id="wd-available-from" value={assignment.availableDate} className="form-control" />
                       </div>
                       <div className="col-sm-5 me-5">
                           <label htmlFor="wd-available-until" className="col-form-label text-secondary fw-bold">
                               Until
                           </label>
-                          <input type="date" id="wd-available-until" value="2024-05-20" className="form-control" />
+                          <input type="date" id="wd-available-until" value={assignment.availableUntil} className="form-control" />
                       </div>
                   </div>
               </div>
           </div>
           <hr />
           <div className="d-flex justify-content-end">
-              <button type="button" className="btn btn-secondary me-2">Cancel</button>
-              <button type="submit" className="btn btn-danger">Save</button>
+              <button
+                  type="button"
+                  className="btn btn-secondary me-2"
+                  onClick={() => navigate(`/Kanbas/Courses/${cid}/Assignments`)}
+              >Cancel</button>
+              <button type="submit"
+                      className="btn btn-danger"
+                      onClick={() => navigate(`/Kanbas/Courses/${cid}/Assignments`)}
+              >Save</button>
           </div>
       </div>
     );
