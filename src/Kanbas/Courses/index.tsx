@@ -4,11 +4,11 @@ import CoursesNavigation from "./Navigation";
 import Home from "./Home";
 import Modules from "./Modules";
 import PeopleTable from "./People/Table";
-import{ courses } from "../Database";
 import { Navigate, Route, Routes, useParams, useLocation } from "react-router";
 import { FaAlignJustify } from "react-icons/fa6";
+import FacultyContent from "../Account/FacultyContent";
 
-export default function Courses() {
+export default function Courses({ courses }: { courses: any[]; }) {
     const { cid } = useParams()
     const course = courses.find((course) => course._id === cid);
     const { pathname } = useLocation();
@@ -21,7 +21,7 @@ export default function Courses() {
             </h2>
             <hr />
             <div className="d-flex">
-                <div className="d-none d-md-block">
+                <div className="d-none d-lg-block">
                     <CoursesNavigation />
                 </div>
                 <div className="flex-fill">
@@ -30,7 +30,7 @@ export default function Courses() {
                         <Route path="Home" element={<Home />} />
                         <Route path="Modules" element={<Modules />} />
                         <Route path="Assignments" element={<Assignments />} />
-                        <Route path="Assignments/:aid" element={<AssignmentEditor />} />
+                        <Route path="Assignments/:aid" element={<FacultyContent><AssignmentEditor /></FacultyContent>} />
                         <Route path="People" element={<PeopleTable />} />
                     </Routes>
                 </div>

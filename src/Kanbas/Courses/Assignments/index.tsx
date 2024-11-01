@@ -4,27 +4,32 @@ import { BsGripVertical } from "react-icons/bs";
 import { LuFileSignature } from "react-icons/lu";
 import { IoMdArrowDropdown } from "react-icons/io";
 import AssignmentControlButtons from "./AssignmentControlButtons";
+import FacultyContent from "../../Account/FacultyContent";
+import { addAssignment, deleteAssignment, updateAssignment } from "./reducer";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import { Link, useParams } from "react-router-dom";
-import * as db from "../../Database";
 
 export default function Assignments() {
     const { cid } = useParams();
-    const assignments = db.assignments;
+    const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+    const dispatch = useDispatch();
+
     return (
         <div id="wd-assignments">
             <br/>
             <br/>
-            <AssignmentsControls />
+            <FacultyContent><AssignmentsControls /></FacultyContent>
             <br/>
             <br/>
             <ul id="wd-assignments" className="list-group rounded-0">
                 <li className="wd-assignment list-group-item p-0 mb-5 fs-5 border-gray">
                     <div className="wd-title p-3 ps-2 fw-bold bg-secondary-subtle fs-3">
-                        <BsGripVertical className="me-2" />
+                        <FacultyContent><BsGripVertical className="me-2" /></FacultyContent>
                         <IoMdArrowDropdown className="text-secondary" />
                         ASSIGNMENTS
-                        <AssignmentControlButtons />
+                        <FacultyContent><AssignmentControlButtons /></FacultyContent>
                     </div>
                 {assignments
                     .filter((assignment: any) => assignment.course === cid)
@@ -32,7 +37,7 @@ export default function Assignments() {
                         <ul className="wd-lessons list-group rounded-0">
                             <li className="wd-lesson d-flex justify-content-between align-items-center list-group-item p-3 ps-1">
                                 <div className="d-flex align-items-center">
-                                    <BsGripVertical className="me-2 fs-3" />
+                                    <FacultyContent><BsGripVertical className="me-2 fs-3" /></FacultyContent>
                                     <LuFileSignature className="me-2 fs-3 text-success" />
                                     <div className="d-flex flex-column">
                                         <div className="ms-2">

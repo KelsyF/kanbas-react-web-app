@@ -1,5 +1,6 @@
 import Modules from "../Modules";
 import CourseStatus from "./Status";
+import FacultyContent from "../../Account/FacultyContent";
 
 export default function Home() {
     return (
@@ -7,9 +8,11 @@ export default function Home() {
             <div className="flex-fill">
                 <Modules />
             </div>
-            <div className="d-flex d-md-block ms-4">
-                <CourseStatus />
-            </div>
+            <FacultyContent>
+                <div className="d-none d-xl-block ms-4">
+                    <CourseStatus />
+                </div>
+            </FacultyContent>
         </div>
     );
 }
