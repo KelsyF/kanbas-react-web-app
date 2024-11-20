@@ -1,22 +1,15 @@
 
-import AssignmentEditor from "./Editor";
 import { FaPlus } from "react-icons/fa6";
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export default function AssignmentsControls() {
-    const dispatch = useDispatch();
-    const assignment = useSelector((state: any) => state.assignmentsReducer)
+    const { cid} = useParams();
+    const navigate = useNavigate();
+
     const handleAddAssignment = () => {
-        const newAssignment = {
-            title: "",
-            course: "",
-            description: "",
-            availableDate: "",
-            availableUntil: '',
-            dueDate: '',
-            points: 0,
-        };
+        navigate(`/Kanbas/Courses/${cid}/Assignments/new`)
     };
 
     return (
@@ -36,10 +29,13 @@ export default function AssignmentsControls() {
                 <FaPlus className="position-relative me-2" style={{ bottom: "1px" }}/>
                 Group
             </button>
-            <button id="wd-add-assignment" className="btn btn-lg btn-danger me-1 float-end"
-                    type="button" onClick={handleAddAssignment}>
-                <FaPlus className="position-relative me-2" style={{ bottom: "1px" }}/>
-                Assignment
+            <button
+                id="wd-add-assignment"
+                className="btn btn-lg btn-danger me-1 float-end"
+                type="button"
+                onClick={handleAddAssignment}>
+                    <FaPlus className="position-relative me-2" style={{ bottom: "1px" }}/>
+                    Assignment
             </button>
         </div>
     );

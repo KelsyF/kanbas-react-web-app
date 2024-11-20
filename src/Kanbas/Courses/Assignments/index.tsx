@@ -3,65 +3,111 @@ import AssignmentsControls from "./AssignmentsControls";
 import { BsGripVertical } from "react-icons/bs";
 import { LuFileSignature } from "react-icons/lu";
 import { IoMdArrowDropdown } from "react-icons/io";
+import { FaTrash } from "react-icons/fa6";
 import AssignmentControlButtons from "./AssignmentControlButtons";
 import FacultyContent from "../../Account/FacultyContent";
-import { addAssignment, deleteAssignment, updateAssignment } from "./reducer";
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
+import { useSelector, useDispatch } from "react-redux";
 import { Link, useParams } from "react-router-dom";
+import { useState } from "react";
+import { deleteAssignment } from "./reducer";
+import AssignmentDelete from "./AssignmentDelete";
 
 export default function Assignments() {
     const { cid } = useParams();
     const { assignments } = useSelector((state: any) => state.assignmentsReducer);
-    const dispatch = useDispatch();
+    const dispatch = useDispatch()
+    console.log(assignments); // Debugging
+
+    const [assignmentToDelete, setAssignmentToDelete] = useState<any>(null);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+    const handleDeleteClick = (assignment: any) => {
+        setAssignmentToDelete(assignment);
+        setIsDeleteOpen(true);
+    }
+
+    const handleDeleteAssignment = (assignmentID: any) => {
+        dispatch(deleteAssignment(assignmentID));
+        setIsDeleteOpen(false);
+        setAssignmentToDelete(null);
+    };
+
+    const handleCloseDelete = () => {
+        setIsDeleteOpen(false);
+        setAssignmentToDelete(null);
+    }
 
     return (
         <div id="wd-assignments">
             <br/>
             <br/>
-            <FacultyContent><AssignmentsControls /></FacultyContent>
+            <FacultyContent>
+                <AssignmentsControls />
+            </FacultyContent>
             <br/>
             <br/>
             <ul id="wd-assignments" className="list-group rounded-0">
                 <li className="wd-assignment list-group-item p-0 mb-5 fs-5 border-gray">
                     <div className="wd-title p-3 ps-2 fw-bold bg-secondary-subtle fs-3">
-                        <FacultyContent><BsGripVertical className="me-2" /></FacultyContent>
+                        <FacultyContent>
+                            <BsGripVertical className="me-2" />
+                        </FacultyContent>
                         <IoMdArrowDropdown className="text-secondary" />
                         ASSIGNMENTS
-                        <FacultyContent><AssignmentControlButtons /></FacultyContent>
+                        <FacultyContent>
+                            <AssignmentControlButtons />
+                        </FacultyContent>
                     </div>
-                {assignments
+                {assignments && assignments
                     .filter((assignment: any) => assignment.course === cid)
                     .map((assignment: any) => (
-                        <ul className="wd-lessons list-group rounded-0">
-                            <li className="wd-lesson d-flex justify-content-between align-items-center list-group-item p-3 ps-1">
-                                <div className="d-flex align-items-center">
-                                    <FacultyContent><BsGripVertical className="me-2 fs-3" /></FacultyContent>
-                                    <LuFileSignature className="me-2 fs-3 text-success" />
-                                    <div className="d-flex flex-column">
-                                        <div className="ms-2">
-                                            <Link className="wd-assignment-link text-decoration-none text-dark"
-                                               to={`/Kanbas/Courses/${cid}/Assignments/${assignment._id}`}>
-                                                <span className="fw-bold fs-3">{assignment.title}</span>
-                                            </Link>
-                                        </div>
-                                        <div className="ms-2">
-                                            <span className="text-danger">Multiple Modules</span>
-                                            <span className="fw-bold ms-1">| Not available until </span>
-                                            <span className="ms-1">{assignment.available} |</span>
-                                            <div>
-                                                <span className="fw-bold">Due </span>
-                                                <span className="ms-1">{assignment.due} | {assignment.points} pts</span>
-                                            </div>
+                        <li
+                            key={assignment._id}
+                            className="wd-lesson d-flex justify-content-between align-items-center list-group-item p-3 ps-1"
+                        >
+                            <div className="d-flex align-items-center">
+                                <FacultyContent>
+                                    <BsGripVertical className="me-2 fs-3" />
+                                </FacultyContent>
+                                <LuFileSignature className="me-2 fs-3 text-success" />
+                                <div className="d-flex flex-column">
+                                    <div className="ms-2">
+                                        <Link
+                                            className="wd-assignment-link text-decoration-none text-dark"
+                                            to={`/Kanbas/Courses/${cid}/Assignments/${assignment._id}`}>
+                                            <span className="fw-bold fs-3">{assignment.title}</span>
+                                        </Link>
+                                    </div>
+                                    <div className="ms-2">
+                                        <span className="text-danger">Multiple Modules</span>
+                                        <span className="fw-bold ms-1">| Available From </span>
+                                        <span className="ms-1">{assignment.availableDate} |</span>
+                                        <div>
+                                            <span className="fw-bold">Due </span>
+                                            <span className="ms-1">{assignment.dueDate} | {assignment.points} pts</span>
                                         </div>
                                     </div>
                                 </div>
-                            </li>
-                        </ul>
+                            </div>
+                            <FacultyContent>
+                                <button
+                                    className="btn btn-danger me-2"
+                                    onClick={() => handleDeleteClick(assignment)}
+                                >
+                                    <FaTrash />
+                                </button>
+                            </FacultyContent>
+                        </li>
                     ))}
                 </li>
             </ul>
+            {isDeleteOpen && assignmentToDelete && (
+            <AssignmentDelete
+                assignmentID={assignmentToDelete._id}
+                deleteAssignment={(assignmentID) => {handleDeleteAssignment(assignmentID)}}
+                closeDelete={handleCloseDelete}
+            />
+            )}
         </div>
     );
 }
