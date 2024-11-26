@@ -24,15 +24,16 @@ const accountSlice = createSlice({
     initialState,
     reducers: {
         setCurrentUser: (state, action) => {
+            console.log("Payload in setCurrentUser:", action.payload);
            if (action.payload === null) {
                state.currentUser = null;
                state.userRole = null;
                state.enrollments = [];
            } else {
-               state.currentUser = action.payload.user;
+               state.currentUser = action.payload;
                state.userRole = action.payload.role;
-               const storedEnrollments = localStorage.getItem(`enrollments-${action.payload.user._id}`);
-               state.enrollments = storedEnrollments ? JSON.parse(storedEnrollments) : loadEnrollments(action.payload.user._id);
+               const storedEnrollments = localStorage.getItem(`enrollments-${action.payload._id}`);
+               state.enrollments = storedEnrollments ? JSON.parse(storedEnrollments) : loadEnrollments(action.payload._id);
            }
         },
 

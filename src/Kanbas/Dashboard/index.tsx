@@ -81,13 +81,8 @@ export default function Dashboard(
                 <hr/>
                 <div className="row" id="wd-dashboard-courses">
                     <div className="row row-cols-1 row-cols-md-5 g-4">
-                        {(showAllCourses ? courses : courses.filter((course) =>
-                                enrollments.some((enrollment: any) =>
-                                    enrollment.user === currentUser._id &&
-                                    enrollment.course === course._id
-                                )
-                            )).map((course) => (
-                            <div key={course.id} className="col" style={{width: "300px"}}>
+                        {(showAllCourses ? courses : courses.map((course) => (
+                            <div key={course._id} className="col" style={{width: "300px"}}>
                                 <div className="card diflex flex-column h-100 rounded-3 overflow-hidden">
                                     <span className="wd-dashboard-course-link text-decoration-none text-dark"
                                           onClick={() => handleCourseClick(course._id)}>
@@ -105,14 +100,14 @@ export default function Dashboard(
                                                     <div className="d-flex">
                                                         <button id="wd-edit-course-click"
                                                                 onClick={(event) => {
-                                                                    event.preventDefault();
+                                                                    event.stopPropagation();
                                                                     setCourse(course);
                                                                 }}
                                                                 className="btn btn-warning me-2">
                                                             Edit
                                                         </button>
                                                         <button onClick={(event) => {
-                                                            event.preventDefault();
+                                                            event.stopPropagation();
                                                             deleteCourse(course._id);
                                                         }} className="btn btn-danger"
                                                                 id="wd-delete-course-click">
@@ -144,7 +139,7 @@ export default function Dashboard(
                                     </span>
                                 </div>
                             </div>
-                        ))}
+                        )))}
                     </div>
                 </div>
             </div>
