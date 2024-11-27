@@ -26,15 +26,16 @@ export default function Dashboard(
     };
 
     const handleEnrollUnenroll = async (cid: string) => {
+        const userId = currentUser._id;
         let isEnrolled = enrollments.some((enrollment: any) =>
-            enrollment.user === currentUser._id && enrollment.course === cid
+            enrollment.user === userId && enrollment.course === cid
         );
         isEnrolled = !isEnrolled;
         // console.log(isEnrolled);
         if (isEnrolled) {
-            await accountClient.enrollCourse(cid);
+            await accountClient.enrollCourse(cid, userId);
         } else {
-            await accountClient.unenrollCourse(cid);
+            await accountClient.unenrollCourse(cid, userId);
         }
         dispatch( updateEnrollments({ cid: cid, isEnrolled }) );
     };
