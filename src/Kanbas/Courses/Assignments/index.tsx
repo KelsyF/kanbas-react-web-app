@@ -8,15 +8,17 @@ import AssignmentControlButtons from "./AssignmentControlButtons";
 import FacultyContent from "../../Account/FacultyContent";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
-import { deleteAssignment } from "./reducer";
+import { useState, useEffect } from "react";
+import { deleteAssignment, setAssignments } from "./reducer";
 import AssignmentDelete from "./AssignmentDelete";
+import * as coursesClient from "../client";
+import * as assignmentsClient from "./client";
 
 export default function Assignments() {
     const { cid } = useParams();
     const { assignments } = useSelector((state: any) => state.assignmentsReducer);
     const dispatch = useDispatch()
-    console.log(assignments); // Debugging
+    // console.log(assignments); // Debugging
 
     const [assignmentToDelete, setAssignmentToDelete] = useState<any>(null);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -26,8 +28,9 @@ export default function Assignments() {
         setIsDeleteOpen(true);
     }
 
-    const handleDeleteAssignment = (assignmentID: any) => {
-        dispatch(deleteAssignment(assignmentID));
+    const handleDeleteAssignment = async (assignmentId: any) => {
+        await assignmentsClient.deleteAssignment(assignmentId);
+        dispatch(deleteAssignment(assignmentId));
         setIsDeleteOpen(false);
         setAssignmentToDelete(null);
     };
@@ -36,6 +39,15 @@ export default function Assignments() {
         setIsDeleteOpen(false);
         setAssignmentToDelete(null);
     }
+
+    const fetchAssignments = async () => {
+        const assignments = await coursesClient.findAssignmentsForCourse(cid as string);
+        // console.log("Fetch assignments list:", assignments);
+        dispatch(setAssignments(assignments));
+    };
+    useEffect(() => {
+        fetchAssignments();
+    }, [cid]);
 
     return (
         <div id="wd-assignments">
@@ -58,8 +70,7 @@ export default function Assignments() {
                             <AssignmentControlButtons />
                         </FacultyContent>
                     </div>
-                {assignments && assignments
-                    .filter((assignment: any) => assignment.course === cid)
+                {assignments
                     .map((assignment: any) => (
                         <li
                             key={assignment._id}
@@ -103,8 +114,8 @@ export default function Assignments() {
             </ul>
             {isDeleteOpen && assignmentToDelete && (
             <AssignmentDelete
-                assignmentID={assignmentToDelete._id}
-                deleteAssignment={(assignmentID) => {handleDeleteAssignment(assignmentID)}}
+                assignmentId={assignmentToDelete._id}
+                deleteAssignment={handleDeleteAssignment}
                 closeDelete={handleCloseDelete}
             />
             )}

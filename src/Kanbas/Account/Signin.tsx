@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { setCurrentUser } from "./reducer";
 import { useDispatch } from "react-redux";
 import * as client from "./client"
-import store from "../store";
 
 export default function Signin() {
     const [credentials, setCredentials] = useState<any>({});
@@ -17,9 +16,9 @@ export default function Signin() {
                 alert("Invalid credentials.");
                 return;
             }
-            console.log("API response:", user);
+            // console.log("API response:", user);
             dispatch(setCurrentUser(user));
-            console.log("Updated redux state:", store.getState());
+            // console.log("Updated redux state:", store.getState());
             navigate("/Kanbas/Dashboard");
         } catch (error) {
             console.error("Signin failed:", error);

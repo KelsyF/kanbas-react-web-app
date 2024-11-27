@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { addAssignment, updateAssignment } from "./reducer";
+import * as coursesClient from "../client";
+import * as assignmentsClient from "./client";
 
 
 export default function AssignmentEditor( ) {
@@ -19,27 +21,48 @@ export default function AssignmentEditor( ) {
         availableDate:"",
         availableUntil:"",
     });
+    const [error, setError] = useState<string>("");
 
     useEffect(() => {
-        if (aid) {
+        if (aid && aid !== "new") {
             const existingAssignment = assignments.find((a: any) => a._id === aid);
             if (existingAssignment) {
-                setAssignment(existingAssignment)
+                setAssignment(existingAssignment);
+            } else {
+                setAssignment(assignment);
             }
+        } else {
+            setAssignment(assignment);
         }
     }, [aid, assignments]);
 
-    const handleSave = () => {
-        if (aid === "new") {
-            const newAssignment = { ...assignment, _id: String(Date.now()), course: cid}
-            console.log("Dispatching addAssignment:", newAssignment); // Debugging
-            dispatch(addAssignment(newAssignment));
-        } else {
-            const updatedAssignment = { ...assignment, _id: aid };
-            dispatch(updateAssignment(updatedAssignment));
-            console.log("Dispatching updateAssignment:", updatedAssignment);  // Debugging
+    const validateAssignment = () => {
+        if (!assignment.title.trim() || assignment.points <= 0 || !assignment.dueDate) {
+            setError("Please complete all required fields (Title, Points, and Due Date).");
+            return false;
         }
-        navigate(`/Kanbas/Courses/${cid}/Assignments`)
+        return true;
+    }
+
+    const handleSave = async () => {
+        if (!validateAssignment()) return;
+        try {
+            if (aid === "new") {
+                const newAssignment = {...assignment, _id: String(Date.now()), course: cid}
+                const createAssignment = await coursesClient.createAssignmentForCourse(cid as string , newAssignment);
+                // console.log("Dispatched createAssignment:", createAssignment); // Debugging
+                dispatch(addAssignment(createAssignment));
+            } else {
+                const updatedAssignment = {...assignment, _id: aid};
+                const saveAssignment = await assignmentsClient.updateAssignment(updatedAssignment);
+                dispatch(updateAssignment(saveAssignment));
+                // console.log("Dispatching updateAssignment:", updatedAssignment);  // Debugging
+            }
+            navigate(`/Kanbas/Courses/${cid}/Assignments`)
+        } catch (error) {
+            setError("Failed to save assignment. Please try again.")
+            console.log("Save failed error:", error);
+        }
     };
 
 
@@ -73,7 +96,8 @@ export default function AssignmentEditor( ) {
               <div className="col-sm-10">
                   <input
                       id="wd-points"
-                      value={assignment.points}
+                      defaultValue={assignment.points}
+                      type="number"
                       className="form-control"
                       onChange={(e) => setAssignment({...assignment, points: Number(e.target.value)})}
                       placeholder="Assignment Points"/>
@@ -216,6 +240,9 @@ export default function AssignmentEditor( ) {
                   </div>
               </div>
           </div>
+          {error && <div className="alert alert-danger">
+              {error}
+          </div>}
           <hr />
           <div className="d-flex justify-content-end">
               <button

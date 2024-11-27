@@ -24,7 +24,7 @@ const accountSlice = createSlice({
     initialState,
     reducers: {
         setCurrentUser: (state, action) => {
-            console.log("Payload in setCurrentUser:", action.payload);
+            // console.log("Payload in setCurrentUser:", action.payload);
            if (action.payload === null) {
                state.currentUser = null;
                state.userRole = null;

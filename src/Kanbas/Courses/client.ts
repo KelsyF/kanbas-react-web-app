@@ -9,6 +9,18 @@ export const fetchAllCourses = async () => {
     return data;
 }
 
+export const createAssignmentForCourse = async (courseId: string, assignment: any) => {
+    // console.log("Payload for createAssignmentForCourse:", assignment);
+    const response = await axios.post(
+        `${COURSES_API}/${courseId}/assignments`,
+        assignment
+    );
+    return response.data;
+}
+export const findAssignmentsForCourse = async (courseId: string | undefined) => {
+    const response = await axios.get(`${COURSES_API}/${courseId}/assignments`);
+    return response.data;
+}
 export const createModuleForCourse = async (courseId: string, module: any) => {
     const response = await axios.post(
         `${COURSES_API}/${courseId}/modules`,

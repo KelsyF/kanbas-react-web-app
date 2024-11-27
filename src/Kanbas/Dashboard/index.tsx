@@ -4,11 +4,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { updateEnrollments } from "../Account/reducer";
 import FacultyContent from "../Account/FacultyContent";
 import StudentContent from "../Account/StudentContent";
+import * as accountClient from "../Account/client";
 
 export default function Dashboard(
-    { courses, course, setCourse, addNewCourse,
+    { myCourses, allCourses, course, setCourse, addNewCourse,
         deleteCourse, updateCourse}: {
-        courses: any[]; course: any;
+        myCourses: any[]; allCourses: any[]; course: any;
         setCourse: (course: any) => void;
         addNewCourse: () => void;
         deleteCourse: (course: any) => void;
@@ -24,12 +25,17 @@ export default function Dashboard(
         setShowAllCourses(!showAllCourses);
     };
 
-    const handleEnrollUnenroll = (cid: string) => {
+    const handleEnrollUnenroll = async (cid: string) => {
         let isEnrolled = enrollments.some((enrollment: any) =>
             enrollment.user === currentUser._id && enrollment.course === cid
         );
         isEnrolled = !isEnrolled;
-        console.log(isEnrolled);
+        // console.log(isEnrolled);
+        if (isEnrolled) {
+            await accountClient.enrollCourse(cid);
+        } else {
+            await accountClient.unenrollCourse(cid);
+        }
         dispatch( updateEnrollments({ cid: cid, isEnrolled }) );
     };
 
@@ -77,11 +83,11 @@ export default function Dashboard(
                                 onChange={(e) => setCourse({ ...course, description: e.target.value })}/>
                     <hr/>
                 </FacultyContent>
-                <h2 id="wd-dashboard-published">Published Courses ({courses.length})</h2>
+                <h2 id="wd-dashboard-published">Published Courses ({myCourses.length})</h2>
                 <hr/>
                 <div className="row" id="wd-dashboard-courses">
                     <div className="row row-cols-1 row-cols-md-5 g-4">
-                        {(showAllCourses ? courses : courses.map((course) => (
+                        {(showAllCourses ? allCourses : myCourses).map((course) => (
                             <div key={course._id} className="col" style={{width: "300px"}}>
                                 <div className="card diflex flex-column h-100 rounded-3 overflow-hidden">
                                     <span className="wd-dashboard-course-link text-decoration-none text-dark"
@@ -139,7 +145,7 @@ export default function Dashboard(
                                     </span>
                                 </div>
                             </div>
-                        )))}
+                        ))}
                     </div>
                 </div>
             </div>
