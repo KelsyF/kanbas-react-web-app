@@ -18,6 +18,16 @@ export default function AccountNavigation() {
                     {link === "Signin" ? "Sign in" : link === "Signup" ? "Sign up" : "Profile"}
                 </NavLink>
             ))}
+            {currentUser && currentUser.role === "ADMIN" && (
+                <NavLink
+                    to="/Kanbas/Account/Users"
+                    className={({ isActive }) =>
+                        `list-group-item border-0 ${isActive ? "active" : "text-danger"}`
+                    }
+                >
+                    Users
+                </NavLink>
+            )}
         </div>
     );
 }
