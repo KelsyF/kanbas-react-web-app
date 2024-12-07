@@ -15,7 +15,7 @@ export default function Users() {
             const users = await client.findUsersByPartialName(name);
             setUsers(users);
         } else {
-            fetchUsers();
+            await fetchUsers();
         }
     };
     const filterUsersByRole = async (role: string) => {
@@ -24,7 +24,7 @@ export default function Users() {
             const users = await client.findUsersByRole(role);
             setUsers(users);
         } else {
-            fetchUsers();
+            await fetchUsers();
         }
     };
     const fetchUsers = async () => {
