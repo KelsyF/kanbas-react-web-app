@@ -1,13 +1,12 @@
 
 import React from "react";
 import { FaUserCircle } from "react-icons/fa";
-import * as client from "../../Account/client";
 import PeopleDetails from "./Details";
 import {Link} from "react-router-dom";
 
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US').format(date); // m/d/y format
+    return date.toLocaleDateString();
 };
 
 export default function PeopleTable({ users = [] } : { users?: any[] }) {
@@ -22,7 +21,7 @@ export default function PeopleTable({ users = [] } : { users?: any[] }) {
                         <th>Login ID</th>
                         <th>Section</th>
                         <th>Role</th>
-                        <th>Last Activity</th>
+                        <th className="text-nowrap">Last Activity</th>
                         <th className="text-nowrap">Total Activity</th>
                     </tr>
                 </thead>
