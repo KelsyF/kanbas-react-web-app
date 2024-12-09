@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router";
+import { Routes, Route, Navigate, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import {Provider, useSelector} from "react-redux";
 import Account from "./Account";
@@ -17,11 +17,21 @@ function KanbasInner() {
     const [courses, setCourses] = useState<any[]>([]);
     const [course, setCourse] = useState<any>({});
     const [enrolling, setEnrolling] = useState<boolean>(false);
+    const navigate = useNavigate();
     const findCoursesForUser = async () => {
+        if (!currentUser || !currentUser._id) {
+            console.warn("findCoursesForUser: No user is currently logged in or user ID is missing.");
+            setCourses([]);
+            navigate("/Kanbas/Account/Signin"); // Redirect to login
+            return;
+        }
         const allCourses = await courseClient.fetchAllCourses();
+
         const enrolledCourses = await userClient.findCoursesForUser(currentUser._id);
 
-        const enrolledCourseIds = new Set(enrolledCourses.map((course: any) => course._id));
+        const validEnrolledCourses = enrolledCourses.filter((course: any) => course && course._id);
+
+        const enrolledCourseIds = new Set(validEnrolledCourses.map((course: any) => course._id));
 
         const coursesWithEnrollment = allCourses
             .map((course: any) => ({
