@@ -1,53 +1,109 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useSelector } from "react-redux";
-import { fetchQuestionsForQuiz } from "./questions/client";
 
-export default function QuizPreview() {
-    const { qid } = useParams();
+const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER;
+
+export default function QuizPreview({
+    qid,
+    cid,
+    onBack,
+}: {
+    qid: string;
+    cid: string;
+    onBack: () => void;
+}) {
     const { currentUser } = useSelector((state: any) => state.accountReducer);
-    const navigate = useNavigate();
 
     const [questions, setQuestions] = useState<any[]>([]);
     const [answers, setAnswers] = useState<{ [key: string]: any }>({});
+    const [previousAttempt, setPreviousAttempt] = useState<any>(null);
+    const [score, setScore] = useState<number | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchQuestions = async () => {
+    // Fetch questions and faculty's previous attempt
+    const fetchQuizData = async () => {
         try {
-            const fetchedQuestions = await fetchQuestionsForQuiz(qid as string);
-            setQuestions(fetchedQuestions);
+            const questionsResponse = await axios.get(`${REMOTE_SERVER}/api/quizzes/${qid}/questions`);
+            console.log(questionsResponse);
+            setQuestions(questionsResponse.data);
+
+            // Fetch faculty's previous attempt
+            const attemptResponse = await axios.get(
+                `${REMOTE_SERVER}/api/attempts/${qid}/user/${currentUser._id}`
+            );
+            if (attemptResponse.data) {
+                setPreviousAttempt(attemptResponse.data);
+                setAnswers(
+                    attemptResponse.data.answers.reduce((acc: any, ans: any) => {
+                        acc[ans.questionId] = ans.selectedAnswer;
+                        return acc;
+                    }, {})
+                );
+                setScore(attemptResponse.data.score);
+            }
         } catch (e) {
-            console.error("Failed to fetch quiz questions:", e);
+            console.error("Failed to fetch quiz data:", e);
             setError("Failed to load the quiz. Please try again later.");
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchQuestions();
+        fetchQuizData();
     }, [qid]);
 
     const handleAnswerChange = (questionId: string, value: any) => {
         setAnswers({ ...answers, [questionId]: value });
     };
 
-    const handleSubmit = () => {
-        // For students: Submit the answers
-        if (!currentUser || currentUser.role !== "Student") {
-            setError("Only students can submit quiz answers.");
-            return;
-        }
+    const handleSubmit = async () => {
+        try {
+            const attemptData = {
+                quizId: qid,
+                userId: currentUser._id,
+                answers: questions.map((question: any) => ({
+                    questionId: question._id,
+                    selectedAnswer: answers[question._id] || "",
+                    isCorrect:
+                        question.type === "CHOICE" ||
+                        question.type === "TRUEFALSE"
+                            ? question.choices.some(
+                                (choice: any) => choice.text === answers[question._id] && choice.isCorrect
+                            )
+                            : question.correctAnswers.includes(answers[question._id]),
+                })),
+            };
 
-        console.log("Submitted answers:", answers);
-        alert("Your answers have been submitted!");
-        navigate(-1); // Navigate back after submission
+            const correctCount = attemptData.answers.filter((ans: any) => ans.isCorrect).length;
+            const totalQuestions = questions.length;
+
+            const attemptResponse = await axios.post(`${REMOTE_SERVER}/api/attempts`, {
+                ...attemptData,
+                score: correctCount,
+            });
+
+            setScore(correctCount);
+            alert(`Quiz submitted! You scored ${correctCount} out of ${totalQuestions}.`);
+        } catch (e) {
+            console.error("Failed to submit quiz:", e);
+            setError("Failed to submit the quiz. Please try again.");
+        }
     };
+
+    if (loading) {
+        return <p>Loading quiz preview...</p>;
+    }
 
     return (
         <div id="wd-quiz-preview">
             <h1>Quiz Preview</h1>
             {error && <div className="alert alert-danger">{error}</div>}
-            {questions.length === 0 && !error && <p>Loading quiz questions...</p>}
+            {questions.length === 0 && !error && <p>No questions available for this quiz.</p>}
 
             {questions.length > 0 && (
                 <form>
@@ -57,7 +113,7 @@ export default function QuizPreview() {
                                 {index + 1}. {question.title}
                             </h4>
                             <p>{question.questionText}</p>
-                            {question.type === "Multiple Choice" && (
+                            {question.type === "CHOICE" && (
                                 <div>
                                     {question.choices.map((choice: any, i: number) => (
                                         <div key={i} className="form-check">
@@ -70,16 +126,13 @@ export default function QuizPreview() {
                                                 onChange={() =>
                                                     handleAnswerChange(question._id, choice.text)
                                                 }
-                                                disabled={currentUser.role !== "Student"}
                                             />
-                                            <label className="form-check-label">
-                                                {choice.text}
-                                            </label>
+                                            <label className="form-check-label">{choice.text}</label>
                                         </div>
                                     ))}
                                 </div>
                             )}
-                            {question.type === "True/False" && (
+                            {question.type === "TRUEFALSE" && (
                                 <div>
                                     <div className="form-check">
                                         <input
@@ -91,7 +144,6 @@ export default function QuizPreview() {
                                             onChange={() =>
                                                 handleAnswerChange(question._id, "True")
                                             }
-                                            disabled={currentUser.role !== "Student"}
                                         />
                                         <label className="form-check-label">True</label>
                                     </div>
@@ -105,13 +157,12 @@ export default function QuizPreview() {
                                             onChange={() =>
                                                 handleAnswerChange(question._id, "False")
                                             }
-                                            disabled={currentUser.role !== "Student"}
                                         />
                                         <label className="form-check-label">False</label>
                                     </div>
                                 </div>
                             )}
-                            {question.type === "Fill in the Blank" && (
+                            {question.type === "BLANK" && (
                                 <input
                                     type="text"
                                     className="form-control"
@@ -120,22 +171,36 @@ export default function QuizPreview() {
                                     onChange={(e) =>
                                         handleAnswerChange(question._id, e.target.value)
                                     }
-                                    disabled={currentUser.role !== "Student"}
                                 />
                             )}
                         </div>
                     ))}
 
-                    {currentUser.role === "Student" && (
+                    <div className="d-flex justify-content-between mt-4">
                         <button
                             type="button"
-                            className="btn btn-primary"
-                            onClick={handleSubmit}
+                            className="btn btn-secondary"
+                            onClick={onBack}
                         >
-                            Submit
+                            Back to Quiz Details
                         </button>
-                    )}
+                        {currentUser.role === "FACULTY" && (
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={handleSubmit}
+                            >
+                                Submit Preview
+                            </button>
+                        )}
+                    </div>
                 </form>
+            )}
+
+            {score !== null && (
+                <div className="alert alert-info mt-4">
+                    <strong>Last Attempt Score:</strong> {score} out of {questions.length}
+                </div>
             )}
         </div>
     );

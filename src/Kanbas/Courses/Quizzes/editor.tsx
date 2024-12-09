@@ -1,84 +1,140 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { addQuiz, updateQuiz } from "./reducer";
-import { createQuiz, updateQuiz as updateQuizAPI } from "./client";
+import axios from "axios";
+import QuestionsEditor from "./questions/editor";
 
-export default function QuizEditor() {
-    const { cid, qid } = useParams();
-    const { quizzes } = useSelector((state: any) => state.quizzesReducer);
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER;
 
-    const [quiz, setQuiz] = useState<any>({ title: "", description: "", points: 0 });
+export default function QuizEditor({ quiz, onSave, onCancel }: {
+    quiz: any,
+    onSave: (updatedQuiz: any) => void;
+    onCancel: () => void;
+}) {
+    const [editedQuiz, setEditedQuiz] = useState(quiz || {}); // Initialize with the passed quiz
+    const [activeTab, setActiveTab] = useState<"details" | "questions">("details");
     const [error, setError] = useState<string>("");
 
     useEffect(() => {
-        if (qid && qid !== "new") {
-            const existingQuiz = quizzes.find((q: any) => q._id === qid);
-            if (existingQuiz) setQuiz(existingQuiz);
-        }
-    }, [qid, quizzes]);
+        setEditedQuiz(quiz); // Update editedQuiz when quiz prop changes
+    }, [quiz]);
 
     const validateQuiz = () => {
-        if (!quiz.title.trim()  || quiz.points <= 0) {
-            setError("Title and points are required.");
+        if (!editedQuiz.title?.trim()) {
+            setError("Title is required.");
             return false;
         }
         return true;
     };
 
-    const handleSave = async () => {
+    const handleSave = async (publish = false) => {
         if (!validateQuiz()) {
             return;
         }
 
         try {
-            if(qid === "new") {
-                const newQuiz = await createQuiz({ ...quiz, courseId: cid });
-                dispatch(addQuiz(newQuiz));
-            } else {
-                const updatedQuiz = await updateQuizAPI(quiz);
-                dispatch(updateQuiz(updatedQuiz));
-            }
-            navigate(`/Kanbas/Courses/${cid}/Quizzes`);
-        } catch (e) {
-            console.error(e);
+            const updatedQuiz = { ...editedQuiz, isPublished: publish };
+            await axios.put(`${REMOTE_SERVER}/api/quizzes/${quiz._id}`, updatedQuiz);
+            onSave(updatedQuiz); // Trigger the onSave prop with the updated quiz
+        } catch (error) {
+            console.error("Error saving quiz:", error);
             setError("Failed to save quiz.");
         }
     };
 
     return (
-        <div>
+        <div className="container mt-4">
             <h1>Quiz Editor</h1>
-            {error && <div className="alert alert-danger">{error}</div>}
-            <input
-                type="text"
-                value={quiz.title}
-                onChange={(e) => setQuiz({ ...quiz, title: e.target.value })}
-                placeholder="Quiz Title"
-                className="form-control mb-3"
-            />
-            <textarea
-                value={quiz.description}
-                onChange={(e) => setQuiz({ ...quiz, description: e.target.value })}
-                placeholder="Quiz Description"
-                className="form-control mb-3"
-            />
-            <input
-                type="number"
-                value={quiz.points}
-                onChange={(e) => setQuiz({ ...quiz, points: Number(e.target.value) })}
-                placeholder="Points"
-                className="form-control mb-3"
-            />
-            <button className="btn btn-secondary" onClick={() => navigate(-1)}>
-                Cancel
-            </button>
-            <button className="btn btn-danger" onClick={handleSave}>
-                Save
-            </button>
+            <div className="nav nav-tabs mb-4">
+                <button
+                    className={`nav-link ${activeTab === "details" ? "active" : ""}`}
+                    onClick={() => setActiveTab("details")}
+                >
+                    Details
+                </button>
+                <button
+                    className={`nav-link ${activeTab === "questions" ? "active" : ""}`}
+                    onClick={() => setActiveTab("questions")}
+                >
+                    Questions
+                </button>
+            </div>
+
+            {activeTab === "details" && (
+                <div>
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    <input
+                        type="text"
+                        value={editedQuiz.title || ""}
+                        onChange={(e) => setEditedQuiz({ ...editedQuiz, title: e.target.value })}
+                        placeholder="Quiz Title"
+                        className="form-control mb-3"
+                    />
+                    <textarea
+                        value={editedQuiz.description || ""}
+                        onChange={(e) =>
+                            setEditedQuiz({ ...editedQuiz, description: e.target.value })
+                        }
+                        placeholder="Quiz Description"
+                        className="form-control mb-3"
+                    />
+                    <select
+                        className="form-select mb-3"
+                        value={editedQuiz.type || "Graded Quiz"}
+                        onChange={(e) =>
+                            setEditedQuiz({ ...editedQuiz, type: e.target.value })
+                        }
+                    >
+                        <option value="Graded Quiz">Graded Quiz</option>
+                        <option value="Practice Quiz">Practice Quiz</option>
+                        <option value="Graded Survey">Graded Survey</option>
+                        <option value="Ungraded Survey">Ungraded Survey</option>
+                    </select>
+                    <div className="mb-3">
+                        <label>Points</label>
+                        <input
+                            type="number"
+                            className="form-control"
+                            value={editedQuiz.points || 0}
+                            onChange={(e) =>
+                                setEditedQuiz({
+                                    ...editedQuiz,
+                                    points: Number(e.target.value),
+                                })
+                            }
+                        />
+                    </div>
+                    {/* Add other quiz fields here */}
+                    <div className="d-flex justify-content-between mt-4">
+                        <button className="btn btn-secondary" onClick={onCancel}>
+                            Cancel
+                        </button>
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => handleSave(false)}
+                        >
+                            Save
+                        </button>
+                        <button
+                            className="btn btn-success"
+                            onClick={() => handleSave(true)}
+                        >
+                            Save & Publish
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === "questions" && (
+                <QuestionsEditor
+                    quizId={quiz._id}
+                    courseId={quiz.courseId}
+                    points={editedQuiz.points || 0}
+                    setQuizPoints={(points: number) =>
+                        setEditedQuiz({ ...editedQuiz, points })
+                    }
+                />
+            )}
         </div>
-    )
-}
+    );
+};

@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { fetchQuizzesForCourse, updateQuiz } from "./client";
-import { setQuizzes, deleteQuiz } from "./reducer";
+import { fetchQuizzesForCourse, updateQuiz, deleteQuiz } from "./client";
+import { setQuizzes } from "./reducer";
 import QuizControls from "./quizControls";
 import FacultyContent from "../../Account/FacultyContent";
 import QuizDelete from "./quizDelete";
@@ -34,10 +34,15 @@ export default function Quizzes() {
     }
 
     const handleDeleteQuiz = async (quizId: string) => {
-        await deleteQuiz(quizId);
-        dispatch(deleteQuiz(quizId));
-        setIsDeleteOpen(false);
-        setQuizToDelete(null);
+        try {
+            await deleteQuiz(quizId);
+            dispatch(setQuizzes(quizzes.filter((quiz: any) => quiz._id !== quizId)));
+        } catch (error) {
+            console.error("Error deleting quiz:", error);
+        } finally {
+            setIsDeleteOpen(false);
+            setQuizToDelete(null);
+        }
     };
 
     const handleCloseDelete = () => {
@@ -47,12 +52,16 @@ export default function Quizzes() {
 
     const togglePublish = async (quiz: any) => {
         const updatedQuiz = { ...quiz, published: !quiz.published };
-        await updateQuiz(updatedQuiz);
-        dispatch(setQuizzes(
-            quizzes.map((q: any) =>
-                q._id === quiz._id ? updateQuiz : q
-            )
-        ));
+        try {
+            await updateQuiz(updatedQuiz);
+            dispatch(setQuizzes(
+                quizzes.map((q: any) =>
+                    q._id === quiz._id ? updatedQuiz : q
+                )
+            ));
+        } catch (error) {
+            console.error("Error toggling publish state:", error);
+        }
     };
 
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
