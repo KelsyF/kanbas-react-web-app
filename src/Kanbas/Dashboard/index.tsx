@@ -22,8 +22,6 @@ export default function Dashboard(
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const[showAllCourses, setShowAllCourses] = useState(false);
-
     const emptyCourse = { name: "", description: ""};
 
     const handleAddCourse = () => {

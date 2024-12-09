@@ -1,5 +1,7 @@
 import Assignments from "./Assignments";
 import AssignmentEditor from "./Assignments/Editor";
+import Quizzes from "./Quizzes";
+import QuizEditor from "./Quizzes/editor";
 import CoursesNavigation from "./Navigation";
 import Home from "./Home";
 import Modules from "./Modules";
@@ -31,6 +33,8 @@ export default function Courses({ courses }: { courses: any[]; }) {
                         <Route path="Modules" element={<Modules />} />
                         <Route path="Assignments" element={<Assignments />} />
                         <Route path="Assignments/:aid" element={<FacultyContent><AssignmentEditor /></FacultyContent>} />
+                        <Route path="Quizzes" element={<Quizzes />} />
+                        <Route path="Quizzes/:qid" element={<FacultyContent><QuizEditor /></FacultyContent>} />
                         <Route path="People" element={<PeopleTable />} />
                     </Routes>
                 </div>
